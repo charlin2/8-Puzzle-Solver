@@ -475,7 +475,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
         // flag for goal state
         boolean solved = false;
 
+        // initial state is solved
         if (gridToString(this).equals("012345678")) {
+            System.out.println("[]");
+            System.out.println("Nodes considered: 1");
             System.out.println("Number of moves: 0");
             return;
         }
@@ -487,7 +490,8 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                 String gridString = gridToString(currState);
                 if (!visited.containsKey(gridString)) {
                     visited.put(gridString, currState);
-                    List<String> validMoves = getValidMoves();
+                    List<String> validMoves = currState.getValidMoves();
+                    // generate and add child states if not visited
                     for (String move : validMoves) {
                         EightPuzzle child = currState.duplicate();
                         if (move.equals("up")) {
@@ -510,6 +514,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                     }
                 }
             }
+            // reset list to add k best nodes back
             open.clear();
 
             // add k best children into consideration
@@ -526,6 +531,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             throw new OutOfMemoryError("Max node limit exceeded.");
         }
 
+        // extract path
         EightPuzzle trav = visited.get("012345678");
         if (trav != null) {
             List<String> path = new LinkedList<>();
@@ -602,7 +608,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
         puzzle.toString();
         // EightPuzzle.setMaxNodes(500);
         puzzle.solveAStar("h2");
-        // puzzle.solveAStar("h1");
-        puzzle.solveBeam(Integer.MAX_VALUE);
+        puzzle.solveAStar("h1");
+        puzzle.solveBeam(10);
     }
 }
