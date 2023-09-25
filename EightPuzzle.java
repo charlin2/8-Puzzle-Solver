@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 public class EightPuzzle implements Comparable<EightPuzzle> {
@@ -295,9 +294,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             path.remove(path.size()-1);
             Collections.reverse(path);
             System.out.println(path.toString());
+            System.out.println("Nodes considered: " + nodes);
             return moveCount-1;
         }
-
+        System.out.println("No path found.");
         return 0;
     }
 
@@ -381,12 +381,11 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
         // add initial state to pq
         pq.add(this);
 
-        while (!visited.containsKey("012345678") && !pq.isEmpty() && nodes <= maxNodes) {
+        while (!pq.isEmpty() && !visited.containsKey("012345678") && nodes <= maxNodes) {
             EightPuzzle currState = pq.poll();
             String gridString = gridToString(currState);
             if (!visited.containsKey(gridString)) {
                 visited.put(gridString, currState);
-
                 List<String> validMoves = currState.getValidMoves();
                 for (String move : validMoves) {
                     // generate and add child state if not already visited
@@ -429,9 +428,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             path.remove(path.size()-1);
             Collections.reverse(path);
             System.out.println(path.toString());
+            System.out.println("Nodes considered: " + nodes);
             return moveCount-1;
         }
-
+        System.out.println("No path found.");
         return 0;
     }
 
@@ -451,6 +451,97 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             }
         }
         return sum;
+    }
+
+    /**
+     * Solves 8-Puzzle using beam search and prints the solution
+     * This version of beam search uses h2
+     * 
+     * @param k Number of states to be considered at each iteration
+     */
+    public void solveBeam(int k) {
+        // min cost heap storing the best k nodes
+        PriorityQueue<EightPuzzle> best = new PriorityQueue<>();
+
+        // list of open nodes
+        List<EightPuzzle> open = new ArrayList<>();
+
+        // keep track of visited states
+        Map<String, EightPuzzle> visited = new HashMap<>();
+
+        // count of generated nodes
+        int nodes = 0;
+
+        // flag for goal state
+        boolean solved = false;
+
+        if (gridToString(this).equals("012345678")) {
+            System.out.println("Number of moves: 0");
+            return;
+        }
+
+        open.add(this);
+
+        while (!open.isEmpty() && !solved && nodes <= maxNodes) {
+            for (EightPuzzle currState : open) {
+                String gridString = gridToString(currState);
+                if (!visited.containsKey(gridString)) {
+                    visited.put(gridString, currState);
+                    List<String> validMoves = getValidMoves();
+                    for (String move : validMoves) {
+                        EightPuzzle child = currState.duplicate();
+                        if (move.equals("up")) {
+                            child.up();
+                        } else if (move.equals("down")) {
+                            child.down();
+                        } else if (move.equals("left")) {
+                            child.left();
+                        } else {
+                            child.right();
+                        }
+                        // using h2 for beam search
+                        if (!visited.containsKey(gridToString(child))) {
+                            int depth = currState.value - h2(currState) + 1;
+                            child.parent = currState;
+                            child.value = depth + h2(child);
+                            best.add(child);
+                            nodes++;
+                        }
+                    }
+                }
+            }
+            open.clear();
+
+            // add k best children into consideration
+            for (int i = 0; !best.isEmpty() && i < k; i++) {
+                open.add(best.poll());
+                if (gridToString(open.get(i)).equals("012345678")) {
+                    solved = true;
+                    visited.put("012345678", open.get(i));
+                }
+            }
+        }
+
+        if (nodes > maxNodes) {
+            throw new OutOfMemoryError("Max node limit exceeded.");
+        }
+
+        EightPuzzle trav = visited.get("012345678");
+        if (trav != null) {
+            List<String> path = new LinkedList<>();
+            while (trav != null) {
+                path.add(trav.prevMove);
+                trav = trav.parent;
+            }
+            Collections.reverse(path);
+            path.remove(0);
+            System.out.println(path.toString());
+            System.out.println("Nodes considered: " + nodes);
+            System.out.println("Number of moves: " + path.size());
+            return;
+        }
+
+        System.out.println("No path found.");
     }
 
     /**
@@ -505,12 +596,13 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
 
     public static void main(String[] args) {
         EightPuzzle puzzle = new EightPuzzle();
-        String[] rows = {"158", "702", "346"};
+        String[] rows = {"012", "345", "678"};
         puzzle.setState(rows);
         puzzle.randomize(50);
         puzzle.toString();
-        EightPuzzle.setMaxNodes(500);
+        // EightPuzzle.setMaxNodes(500);
         puzzle.solveAStar("h2");
-        puzzle.solveAStar("h1");
+        // puzzle.solveAStar("h1");
+        puzzle.solveBeam(Integer.MAX_VALUE);
     }
 }
