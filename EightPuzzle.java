@@ -250,12 +250,17 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * Specify heuristic as "h1" (number of misplaced tiles) or "h2" (manhattan distance)
      * 
      * @param heuristic Either "h1" or "h2"
+     * @return Number of moves
      */
-    public void solveAStar(String heuristic) throws IllegalArgumentException {
+    public int solveAStar(String heuristic) throws IllegalArgumentException {
         if (heuristic.equals("h1")) {
-            System.out.println("Number of moves: " + solveH1() + "\n");
+            int moves = solveH1();
+            System.out.println("Number of moves: " + moves + "\n");
+            return moves;
         } else if (heuristic.equals("h2")) {
-            System.out.println("Number of moves: " + solveH2() + "\n");
+            int moves = solveH2();
+            System.out.println("Number of moves: " + moves + "\n");
+            return moves;
         } else {
             throw new IllegalArgumentException("Invalid heuristic");
         }
@@ -492,8 +497,9 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * This version of beam search uses h2
      * 
      * @param k Number of states to be considered at each iteration
+     * @return Number of moves
      */
-    public void solveBeam(int k) throws IllegalArgumentException {
+    public int solveBeam(int k) throws IllegalArgumentException {
         if (k <= 0) {
             throw new IllegalArgumentException("Invalid input for k.");
         }
@@ -518,7 +524,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             System.out.println("[]");
             System.out.println("Nodes considered: 1");
             System.out.println("Number of moves: 0");
-            return;
+            return 0;
         }
 
         frontier.add(this);
@@ -547,7 +553,6 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                             child.parent = currState;
                             child.value = depth + h2(child);
                             best.add(child);
-                            nodes++;
                         }
                     }
                 }
@@ -558,6 +563,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             // add k best children into consideration
             for (int i = 0; !best.isEmpty() && i < k; i++) {
                 frontier.add(best.poll());
+                nodes++;
                 if (gridToString(frontier.get(i)).equals("012345678")) {
                     solved = true;
                     visited.put("012345678", frontier.get(i));
@@ -582,10 +588,11 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             System.out.println(path.toString());
             System.out.println("Nodes considered: " + nodes);
             System.out.println("Number of moves: " + path.size() + "\n");
-            return;
+            return path.size();
         }
 
         System.out.println("No path found.");
+        return -1;
     }
 
     /**
