@@ -1,0 +1,7 @@
+setState 123 456 780
+printState
+randomizeState 50 10
+printState
+solve A-star h1
+solve A-star h2
+solve beam 10

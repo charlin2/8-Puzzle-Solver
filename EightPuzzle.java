@@ -1,4 +1,6 @@
 import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class EightPuzzle implements Comparable<EightPuzzle> {
     // Using matrix to represent puzzle
@@ -39,7 +41,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * 
      * @param n Number of nodes to consider
      */
-    public static void setMaxNodes(int n) {
+    public static void setMaxNodes(int n) throws IllegalArgumentException {
+        if (n <= 0) {
+            throw new IllegalArgumentException("Please enter a value greater than 0.");
+        }
         maxNodes = n;
     }
 
@@ -170,13 +175,42 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * @param n Number of random moves to perform
      */
     public void randomize(int n) {
+        Random random = new Random();
         // Reset grid
         grid = new int[][] {{0,1,2}, {3,4,5}, {6,7,8}};
         r = 0;
         c = 0;
         for (int i = 0; i < n; i++) {
             List<String> moves = getValidMoves();
-            String move = moves.get((int)(Math.random()*moves.size()));
+            String move = moves.get((int)(random.nextDouble()*moves.size()));
+            if (move.equals("up")) {
+                up();
+            } else if (move.equals("down")) {
+                down();
+            }  else if (move.equals("left")) {
+                left();
+            } else {
+                right();
+            }
+        }
+    }
+
+    /**
+     * Randomly performs n moves from the goal state
+     * Overloaded method to allow for seeding
+     * 
+     * @param n Number of random moves to perform
+     * @param seed Seed for random number generator
+     */
+    public void randomize(int n, long seed) {
+        Random random = new Random(seed);
+        // Reset grid
+        grid = new int[][] {{0,1,2}, {3,4,5}, {6,7,8}};
+        r = 0;
+        c = 0;
+        for (int i = 0; i < n; i++) {
+            List<String> moves = getValidMoves();
+            String move = moves.get((int)(random.nextDouble()*moves.size()));
             if (move.equals("up")) {
                 up();
             } else if (move.equals("down")) {
@@ -219,9 +253,9 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      */
     public void solveAStar(String heuristic) throws IllegalArgumentException {
         if (heuristic.equals("h1")) {
-            System.out.println("Number of moves: " + solveH1());
+            System.out.println("Number of moves: " + solveH1() + "\n");
         } else if (heuristic.equals("h2")) {
-            System.out.println("Number of moves: " + solveH2());
+            System.out.println("Number of moves: " + solveH2() + "\n");
         } else {
             throw new IllegalArgumentException("Invalid heuristic");
         }
@@ -459,12 +493,16 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * 
      * @param k Number of states to be considered at each iteration
      */
-    public void solveBeam(int k) {
+    public void solveBeam(int k) throws IllegalArgumentException {
+        if (k <= 0) {
+            throw new IllegalArgumentException("Invalid input for k.");
+        }
+
         // min cost heap storing the best k nodes
         PriorityQueue<EightPuzzle> best = new PriorityQueue<>();
 
         // list of open nodes
-        List<EightPuzzle> open = new ArrayList<>();
+        List<EightPuzzle> frontier = new ArrayList<>();
 
         // keep track of visited states
         Map<String, EightPuzzle> visited = new HashMap<>();
@@ -483,10 +521,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             return;
         }
 
-        open.add(this);
+        frontier.add(this);
 
-        while (!open.isEmpty() && !solved && nodes <= maxNodes) {
-            for (EightPuzzle currState : open) {
+        while (!frontier.isEmpty() && !solved && nodes <= maxNodes) {
+            for (EightPuzzle currState : frontier) {
                 String gridString = gridToString(currState);
                 if (!visited.containsKey(gridString)) {
                     visited.put(gridString, currState);
@@ -515,14 +553,14 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                 }
             }
             // reset list to add k best nodes back
-            open.clear();
+            frontier.clear();
 
             // add k best children into consideration
             for (int i = 0; !best.isEmpty() && i < k; i++) {
-                open.add(best.poll());
-                if (gridToString(open.get(i)).equals("012345678")) {
+                frontier.add(best.poll());
+                if (gridToString(frontier.get(i)).equals("012345678")) {
                     solved = true;
-                    visited.put("012345678", open.get(i));
+                    visited.put("012345678", frontier.get(i));
                 }
             }
         }
@@ -543,7 +581,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             path.remove(0);
             System.out.println(path.toString());
             System.out.println("Nodes considered: " + nodes);
-            System.out.println("Number of moves: " + path.size());
+            System.out.println("Number of moves: " + path.size() + "\n");
             return;
         }
 
@@ -556,7 +594,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * @param p puzzle to convert
      * @return String of board state
      */
-    private static String gridToString(EightPuzzle p) {
+    protected static String gridToString(EightPuzzle p) {
         StringBuilder sb = new StringBuilder();
         for (int[] row : p.grid) {
             for (int x : row) {
@@ -600,15 +638,82 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
         return false;
     }
 
-    public static void main(String[] args) {
-        EightPuzzle puzzle = new EightPuzzle();
-        String[] rows = {"012", "345", "678"};
-        puzzle.setState(rows);
-        puzzle.randomize(50);
-        puzzle.toString();
-        // EightPuzzle.setMaxNodes(500);
-        puzzle.solveAStar("h2");
-        puzzle.solveAStar("h1");
-        puzzle.solveBeam(10);
+    /**
+     * Please input only one file at a time
+     * ex. java EightPuzzle.java file.txt
+     * 
+     * @param args File name
+     * @throws FileNotFoundException
+     */
+    public static void main(String[] args) throws FileNotFoundException {
+        if (args.length == 0) {
+            System.out.println("Please specify a file.");
+            return;
+        }
+        File file = new File(args[0]);
+        Scanner scan = new Scanner(file);
+        EightPuzzle p = new EightPuzzle();
+        while (scan.hasNextLine()) {
+            String command = scan.nextLine();
+            String[] arguments = command.split(" ");
+            if (arguments[0].equals("setState")) {
+                String[] state = new String[3];
+                state[0] = arguments[1];
+                state[1] = arguments[2];
+                state[2] = arguments[3];
+                if (p.setState(state)) {
+                    System.out.println("State successfully set.");
+                } else {
+                    System.out.println("Invalid state.");
+                }
+            } else if (arguments[0].equals("printState")) {
+                p.toString();
+            } else if (arguments[0].equals("move")) {
+                if (arguments[1].equals("up")) {
+                    if (!p.up()) {
+                        System.out.println("Cannot move up.");
+                    }
+                } else if (arguments[1].equals("down")) {
+                    if (!p.down()) {
+                        System.out.println("Cannot move down.");
+                    }
+                } else if (arguments[1].equals("left")) {
+                    if (!p.left()) {
+                        System.out.println("Cannot move left.");
+                    }
+                } else if (arguments[1].equals("right")) {
+                    if (!p.right()) {
+                        System.out.println("Cannot move right.");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Invalid direction.");
+                }
+            } else if (arguments[0].equals("randomizeState")) {
+                if (arguments.length == 2) {
+                    int n = Integer.parseInt(arguments[1]);
+                    p.randomize(n);
+                } else {
+                    int n = Integer.parseInt(arguments[1]);
+                    long seed = Long.parseLong(arguments[2]);
+                    p.randomize(n, seed);
+                }
+            } else if (arguments[0].equals("solve")) {
+                if (arguments[1].equals("A-star")) {
+                    String heuristic = arguments[2];
+                    p.solveAStar(heuristic);
+                } else if (arguments[1].equals("beam")) {
+                    int k = Integer.parseInt(arguments[2]);
+                    p.solveBeam(k);
+                } else {
+                    throw new IllegalArgumentException("Invalid search method.");
+                }
+            } else if (arguments[0].equals("maxNodes")) {
+                int n = Integer.parseInt(arguments[1]);
+                setMaxNodes(n);
+            } else {
+                throw new IllegalArgumentException("Command not recognized.");
+            }
+        }
+        scan.close();
     }
 }
