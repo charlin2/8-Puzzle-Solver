@@ -55,7 +55,7 @@ public class EightPuzzleTester {
         try {
             p.solveBeam(0);
             Assert.assertFalse(true);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             Assert.assertTrue(true);
         }
 

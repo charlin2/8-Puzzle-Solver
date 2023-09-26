@@ -498,8 +498,9 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * 
      * @param k Number of states to be considered at each iteration
      * @return Number of moves
+     * @throws Exception
      */
-    public int solveBeam(int k) throws IllegalArgumentException {
+    public int solveBeam(int k) throws Exception {
         if (k <= 0) {
             throw new IllegalArgumentException("Invalid input for k.");
         }
@@ -549,10 +550,10 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                         }
                         // using h2 for beam search
                         if (!visited.containsKey(gridToString(child))) {
-                            int depth = currState.value - h2(currState) + 1;
                             child.parent = currState;
-                            child.value = depth + h2(child);
+                            child.value = h2(child);
                             best.add(child);
+                            nodes++;
                         }
                     }
                 }
@@ -563,12 +564,12 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             // add k best children into consideration
             for (int i = 0; !best.isEmpty() && i < k; i++) {
                 frontier.add(best.poll());
-                nodes++;
                 if (gridToString(frontier.get(i)).equals("012345678")) {
                     solved = true;
                     visited.put("012345678", frontier.get(i));
                 }
             }
+            best.clear();
         }
 
         if (nodes > maxNodes) {
@@ -591,8 +592,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             return path.size();
         }
 
-        System.out.println("No path found.");
-        return -1;
+        throw new Exception("No path found.");
     }
 
     /**
@@ -650,9 +650,9 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * ex. java EightPuzzle.java file.txt
      * 
      * @param args File name
-     * @throws FileNotFoundException
+     * @throws Exception
      */
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws Exception {
         if (args.length == 0) {
             System.out.println("Please specify a file.");
             return;

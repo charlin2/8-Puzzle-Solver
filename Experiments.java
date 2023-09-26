@@ -1,5 +1,5 @@
 public class Experiments {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         EightPuzzle p = new EightPuzzle();
         // EightPuzzle.setMaxNodes(1000);
 
@@ -22,6 +22,8 @@ public class Experiments {
                     moveSum += moves;
                 }
             } catch (OutOfMemoryError e) {
+                continue;
+            } catch (Exception e) {
                 continue;
             }
         }
