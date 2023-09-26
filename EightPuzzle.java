@@ -228,7 +228,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
      * 
      * @return List of valid moves
      */
-    public List<String> getValidMoves() {
+    private List<String> getValidMoves() {
         List<String> moves = new LinkedList<>();
         // can move up
         if (r != 0)
@@ -710,6 +710,8 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
             } else if (arguments[0].equals("maxNodes")) {
                 int n = Integer.parseInt(arguments[1]);
                 setMaxNodes(n);
+            } else if (command.isEmpty()) {
+                continue;
             } else {
                 throw new IllegalArgumentException("Command not recognized.");
             }

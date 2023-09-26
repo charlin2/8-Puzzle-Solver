@@ -37,4 +37,33 @@ public class EightPuzzleTester {
         Assert.assertTrue(p.left());
         Assert.assertEquals("123405786", EightPuzzle.gridToString(p));
     }
+
+    /**
+     * Test bad inputs to various methods
+     */
+    @Test
+    public void testInputs() {
+        EightPuzzle p = new EightPuzzle();
+
+        try {
+            p.solveAStar("xD");
+            Assert.assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            Assert.assertTrue(true);
+        }
+
+        try {
+            p.solveBeam(0);
+            Assert.assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            Assert.assertTrue(true);
+        }
+
+        try {
+            EightPuzzle.setMaxNodes(0);
+            Assert.assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            Assert.assertTrue(true);
+        }
+    }
 }

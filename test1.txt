@@ -1,7 +1,11 @@
 setState 123 456 780
 printState
-randomizeState 50 10
+randomizeState 100 10
 printState
+maxNodes 100
 solve A-star h1
 solve A-star h2
+solve beam 2
 solve beam 10
+
+
