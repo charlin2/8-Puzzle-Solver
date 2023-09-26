@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 public class EightPuzzle implements Comparable<EightPuzzle> {
     // Using matrix to represent puzzle
@@ -569,6 +568,7 @@ public class EightPuzzle implements Comparable<EightPuzzle> {
                     visited.put("012345678", frontier.get(i));
                 }
             }
+            // reset priority queue
             best.clear();
         }
 
