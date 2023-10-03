@@ -1,5 +1,8 @@
-setState 123 456 780
+setState 142 035 678
 printState
+solve A-star h1
+solve A-star h2
+solve beam 5
 randomizeState 100 10
 printState
 maxNodes 50

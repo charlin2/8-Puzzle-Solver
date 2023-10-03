@@ -1,5 +1,5 @@
-setState 867 254 301
+setState 012 345 678
 printState
 solve A-star h1
 solve A-star h2
-solve beam 3
+solve beam 5

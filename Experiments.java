@@ -14,7 +14,7 @@ public class Experiments {
                 int moves = -1;
                 start = System.nanoTime();
                 // moves = p.solveAStar("h2");
-                moves = p.solveBeam(100);
+                moves = p.solveBeam(1);
                 end = System.nanoTime();
                 time += end - start;
                 solveCount++;
